@@ -7,6 +7,23 @@
 
 The main feature is an evidence-grounded claim chart: claim elements are decomposed, mapped to cited prior-art passages, and marked with confidence and gaps.
 
+## Current Status
+
+Implemented:
+
+- Python package scaffold for an MCP server.
+- `build_claim_chart` core pipeline with claim decomposition, evidence retrieval, mapping status, confidence, gaps, JSON output, and Markdown output.
+- `search_prior_art` MCP tool wrapper with a PatentsView adapter boundary.
+- Manual prior-art text path for local demos and tests without API keys.
+- Sample request and validation script.
+
+Not yet implemented:
+
+- Production-grade patent text retrieval across USPTO/EPO/KIPRIS/Google Patents.
+- LLM-assisted legal/technical mapping prompts.
+- Multi-reference charts and practitioner editing UX.
+- Full MCP integration test against a live client.
+
 ## Legal Notice
 
 This tool is for research and drafting assistance only. It is not legal advice. All outputs must be reviewed by a qualified patent professional before use.
@@ -42,6 +59,17 @@ For local development without external patent APIs, pass manual prior-art text d
 }
 ```
 
+## Run Offline Demo
+
+This path does not require API keys or external patent services:
+
+```bash
+PYTHONPATH=src python3 -m patent_copilot.cli examples/build_claim_chart_request.json
+PYTHONPATH=src python3 -m patent_copilot.cli examples/build_claim_chart_request.json --format json
+```
+
+Expected result: a three-row claim chart with evidence for the processor and memory elements.
+
 ## MCP Configuration Example
 
 ```json
@@ -76,3 +104,8 @@ pytest
 ruff check .
 ```
 
+If dev dependencies are not installed, run the repository-local validation script:
+
+```bash
+PYTHONPATH=src python3 scripts/validate.py
+```

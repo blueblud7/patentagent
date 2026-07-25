@@ -3,8 +3,6 @@ from __future__ import annotations
 import os
 from typing import Any
 
-import httpx
-
 from patent_copilot.adapters.base import PatentDataAdapter
 from patent_copilot.core.schemas import PriorArtDocument, PriorArtSearchResult
 
@@ -86,6 +84,13 @@ class PatentsViewAdapter(PatentDataAdapter):
         return documents
 
     async def _post(self, path: str, payload: dict[str, Any]) -> dict[str, Any]:
+        try:
+            import httpx
+        except ImportError as exc:
+            raise RuntimeError(
+                "The PatentsView adapter requires httpx. Install the package with `pip install -e .`."
+            ) from exc
+
         headers = {"X-Api-Key": self.api_key or ""}
         async with httpx.AsyncClient(timeout=20) as client:
             response = await client.post(f"{self.base_url}{path}", json=payload, headers=headers)
@@ -103,4 +108,3 @@ def _google_patents_url(patent_id: str | None) -> str | None:
     if not patent_id:
         return None
     return f"https://patents.google.com/patent/US{patent_id}"
-

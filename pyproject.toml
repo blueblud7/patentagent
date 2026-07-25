@@ -25,6 +25,7 @@ dev = [
 
 [project.scripts]
 patent-copilot = "patent_copilot.server:main"
+patent-copilot-demo = "patent_copilot.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/patent_copilot"]
