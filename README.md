@@ -39,10 +39,20 @@ This tool is for research and drafting assistance only. It is not legal advice. 
 ## Install
 
 ```bash
-python -m venv .venv
+python3.11 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
 ```
+
+Check runtime readiness:
+
+```bash
+PYTHONPATH=src python3 -m patent_copilot.preflight_cli
+# After installation:
+patent-copilot-preflight
+```
+
+The core offline demo and validation scripts can run without installed MCP dependencies. The packaged MCP server runtime requires Python 3.11+ and the `mcp` package.
 
 ## Run MCP Server
 

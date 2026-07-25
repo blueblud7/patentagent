@@ -28,6 +28,7 @@ patent-copilot = "patent_copilot.server:main"
 patent-copilot-demo = "patent_copilot.cli:main"
 patent-copilot-eval = "patent_copilot.eval_cli:main"
 patent-copilot-smoke = "patent_copilot.smoke_cli:main"
+patent-copilot-preflight = "patent_copilot.preflight_cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/patent_copilot"]
