@@ -1,0 +1,18 @@
+{
+  "name": "network_gateway",
+  "claim_text": "1. A gateway comprising: a network interface configured to receive packets from a first network; a classifier configured to identify encrypted traffic; and a policy engine configured to block the encrypted traffic based on a user policy.",
+  "prior_art_texts": [
+    {
+      "id": "US-DEMO-3",
+      "title": "Packet gateway",
+      "abstract": "A gateway receives packets and applies policy rules to network traffic.",
+      "description": "[0030] A network interface receives packets from a first network. [0031] A policy engine applies user policy rules to block selected network traffic. [0032] The gateway may classify packet headers."
+    }
+  ],
+  "expected": {
+    "min_rows": 4,
+    "must_disclose_terms": ["network interface", "policy"],
+    "must_not_fully_disclose_terms": ["encrypted traffic"]
+  }
+}
+

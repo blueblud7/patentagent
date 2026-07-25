@@ -18,6 +18,15 @@ class Confidence(str, Enum):
     LOW = "low"
 
 
+class ElementRole(str, Enum):
+    PREAMBLE = "preamble"
+    STRUCTURAL = "structural"
+    FUNCTIONAL = "functional"
+    RELATIONSHIP = "relationship"
+    RESULT = "result"
+    UNKNOWN = "unknown"
+
+
 class ModelMixin:
     @classmethod
     def model_validate(cls, value: Any):
@@ -54,6 +63,8 @@ class PriorArtDocument(ModelMixin):
 class ClaimElement(ModelMixin):
     element_no: str
     text: str
+    role: ElementRole = ElementRole.UNKNOWN
+    signals: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -74,7 +85,19 @@ class ClaimChartRow(ModelMixin):
     mapping: MappingStatus
     analysis: str
     confidence: Confidence
+    role: ElementRole = ElementRole.UNKNOWN
     evidence: list[Evidence] = field(default_factory=list)
+    reference_mappings: list["ReferenceMapping"] = field(default_factory=list)
+    gap: str | None = None
+
+
+@dataclass
+class ReferenceMapping(ModelMixin):
+    prior_art_id: str
+    mapping: MappingStatus
+    confidence: Confidence
+    evidence: list[Evidence] = field(default_factory=list)
+    analysis: str = ""
     gap: str | None = None
 
 
@@ -84,6 +107,7 @@ class ClaimChart(ModelMixin):
     elements: list[ClaimElement]
     rows: list[ClaimChartRow]
     markdown: str
+    csv: str = ""
     disclaimer: str = (
         "Research and drafting assistance only. Not legal advice. "
         "Review by a qualified patent professional is required."

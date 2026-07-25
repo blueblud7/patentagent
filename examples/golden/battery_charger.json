@@ -1,0 +1,24 @@
+{
+  "name": "battery_charger",
+  "claim_text": "1. A charging device comprising: a charging circuit configured to supply current to a battery; a temperature sensor configured to detect a battery temperature; and a controller configured to reduce the current when the battery temperature exceeds a threshold.",
+  "prior_art_texts": [
+    {
+      "id": "US-DEMO-2A",
+      "title": "Temperature-aware charger",
+      "abstract": "A battery charger monitors battery temperature and changes charge current.",
+      "description": "[0010] A charging circuit supplies current to a rechargeable battery. [0011] A temperature sensor detects a battery temperature. [0012] A controller reduces the charging current when the temperature exceeds a preset threshold."
+    },
+    {
+      "id": "US-DEMO-2B",
+      "title": "Basic current supply",
+      "abstract": "A charging circuit supplies current to a load.",
+      "description": "[0020] The circuit provides a constant current without temperature feedback."
+    }
+  ],
+  "expected": {
+    "min_rows": 4,
+    "must_disclose_terms": ["temperature", "threshold"],
+    "must_not_fully_disclose_terms": []
+  }
+}
+

@@ -1,0 +1,18 @@
+{
+  "name": "medical_pump_gap",
+  "claim_text": "1. An infusion pump comprising: a reservoir configured to store medication; a pump actuator configured to deliver the medication; and a biometric sensor configured to authenticate a patient before delivery.",
+  "prior_art_texts": [
+    {
+      "id": "US-DEMO-4",
+      "title": "Infusion pump",
+      "abstract": "An infusion pump stores and delivers medication.",
+      "description": "[0040] A reservoir stores medication. [0041] A pump actuator delivers the medication through tubing."
+    }
+  ],
+  "expected": {
+    "min_rows": 4,
+    "must_disclose_terms": ["reservoir", "actuator"],
+    "must_not_fully_disclose_terms": ["biometric"]
+  }
+}
+

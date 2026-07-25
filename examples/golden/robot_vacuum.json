@@ -1,0 +1,24 @@
+{
+  "name": "robot_vacuum",
+  "claim_text": "1. A cleaning robot comprising: a drive motor configured to move the robot; an optical sensor configured to detect an obstacle; and a navigation module configured to generate a path around the obstacle based on data from the optical sensor.",
+  "prior_art_texts": [
+    {
+      "id": "US-DEMO-5A",
+      "title": "Obstacle-aware cleaning robot",
+      "abstract": "A cleaning robot uses optical sensing for navigation.",
+      "description": "[0050] A drive motor moves the robot across a floor. [0051] An optical sensor detects an obstacle in front of the robot. [0052] A navigation module generates a path around the obstacle based on data from the optical sensor."
+    },
+    {
+      "id": "US-DEMO-5B",
+      "title": "Motorized cleaner",
+      "abstract": "A mobile cleaner includes a motor and wheels.",
+      "description": "[0060] The motor drives wheels to move the cleaner. [0061] The cleaner follows a random movement pattern."
+    }
+  ],
+  "expected": {
+    "min_rows": 4,
+    "must_disclose_terms": ["optical sensor", "navigation"],
+    "must_not_fully_disclose_terms": []
+  }
+}
+

@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 
 from patent_copilot.core.schemas import ClaimElement
+from patent_copilot.core.schemas import ElementRole
 from patent_copilot.core.text import normalize_space
 
 
@@ -10,6 +11,7 @@ CONNECTOR_PATTERNS = [
     r"\band\b\s+(?=(?:a|an|the|said)\s+[a-zA-Z0-9-]+)",
     r";\s*(?:and\s+)?(?=(?:a|an|the|said|wherein)\s+)",
     r",\s*(?=wherein\b)",
+    r"\bwherein\b\s+",
 ]
 
 
@@ -37,12 +39,37 @@ def decompose_claim(claim_text: str) -> list[ClaimElement]:
         if not text:
             continue
         element_no = f"1{chr(ord('A') + len(elements))}"
-        elements.append(ClaimElement(element_no=element_no, text=text))
+        role, signals = classify_element(text, is_preamble=idx == 0 and bool(preamble))
+        elements.append(ClaimElement(element_no=element_no, text=text, role=role, signals=signals))
 
     if not elements and cleaned:
-        elements.append(ClaimElement(element_no="1A", text=cleaned))
+        role, signals = classify_element(cleaned, is_preamble=False)
+        elements.append(ClaimElement(element_no="1A", text=cleaned, role=role, signals=signals))
 
     return elements
+
+
+def classify_element(text: str, *, is_preamble: bool = False) -> tuple[ElementRole, list[str]]:
+    lowered = text.lower()
+    signals: list[str] = []
+
+    if is_preamble:
+        signals.append("claim preamble before transition")
+        return ElementRole.PREAMBLE, signals
+    if any(term in lowered for term in ("configured to", "adapted to", "operable to", "programmed to")):
+        signals.append("configured/adapted functional language")
+        return ElementRole.FUNCTIONAL, signals
+    if any(term in lowered for term in ("based on", "in response to", "according to", "when ")):
+        signals.append("condition or dependency language")
+        return ElementRole.RELATIONSHIP, signals
+    if any(term in lowered for term in ("thereby", "so as to", "such that", "resulting in")):
+        signals.append("result language")
+        return ElementRole.RESULT, signals
+    if re.search(r"\b(a|an|the|said)\s+[a-zA-Z0-9-]+", text):
+        signals.append("apparatus/component noun phrase")
+        return ElementRole.STRUCTURAL, signals
+
+    return ElementRole.UNKNOWN, signals
 
 
 def _split_preamble(text: str) -> tuple[str | None, str]:
@@ -76,5 +103,4 @@ def _split_body(body: str) -> list[str]:
 
 def _looks_like_modifier(text: str) -> bool:
     lowered = text.lower()
-    return lowered.startswith(("to ", "for ", "based on ", "using ", "when "))
-
+    return lowered.startswith(("to ", "for ", "based on ", "using ", "when ", "such that "))

@@ -13,9 +13,12 @@ Implemented:
 
 - Python package scaffold for an MCP server.
 - `build_claim_chart` core pipeline with claim decomposition, evidence retrieval, mapping status, confidence, gaps, JSON output, and Markdown output.
+- CSV output for claim-chart rows.
+- Multi-reference per-element mapping details in JSON output.
+- LLM-ready prompt boundaries for claim decomposition and evidence mapping.
 - `search_prior_art` MCP tool wrapper with a PatentsView adapter boundary.
 - Manual prior-art text path for local demos and tests without API keys.
-- Sample request and validation script.
+- Sample request, 5 golden fixtures, and validation script.
 
 Not yet implemented:
 
@@ -66,6 +69,7 @@ This path does not require API keys or external patent services:
 ```bash
 PYTHONPATH=src python3 -m patent_copilot.cli examples/build_claim_chart_request.json
 PYTHONPATH=src python3 -m patent_copilot.cli examples/build_claim_chart_request.json --format json
+PYTHONPATH=src python3 -m patent_copilot.cli examples/build_claim_chart_request.json --format csv
 ```
 
 Expected result: a three-row claim chart with evidence for the processor and memory elements.

@@ -1,0 +1,19 @@
+{
+  "name": "sensor_classifier",
+  "claim_text": "1. A system comprising: a processor configured to receive sensor data; and a memory storing instructions to classify the sensor data.",
+  "prior_art_texts": [
+    {
+      "id": "US-DEMO-1",
+      "title": "Sensor classification system",
+      "abstract": "A processor receives sensor measurements and classifies the measurements using stored instructions.",
+      "claims": "1. A system including a processor and memory for processing sensor measurements.",
+      "description": "[0042] The processor receives sensor data from an input interface. [0043] Memory stores instructions that classify the sensor data."
+    }
+  ],
+  "expected": {
+    "min_rows": 3,
+    "must_disclose_terms": ["processor", "memory"],
+    "must_not_fully_disclose_terms": []
+  }
+}
+

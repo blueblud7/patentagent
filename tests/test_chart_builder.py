@@ -31,9 +31,11 @@ def test_build_claim_chart_cites_evidence_for_supported_elements() -> None:
         MappingStatus.PARTIALLY_DISCLOSED,
     }
     assert processor_row.evidence
+    assert processor_row.reference_mappings
     assert processor_row.evidence[0].prior_art_id == "US-DEMO-1"
     assert "processor" in processor_row.evidence[0].quote.lower()
-    assert "| Element | Claim Element | Prior Art | Mapping | Evidence | Analysis |" in chart.markdown
+    assert "| Element | Role | Claim Element | Best Prior Art | Mapping | Evidence | Analysis |" in chart.markdown
+    assert chart.csv.startswith("element_no,role,claim_element")
 
 
 def test_build_claim_chart_does_not_disclose_without_evidence() -> None:
@@ -50,4 +52,3 @@ def test_build_claim_chart_does_not_disclose_without_evidence() -> None:
 
     assert all(row.mapping != MappingStatus.DISCLOSED for row in chart.rows)
     assert any(row.mapping == MappingStatus.NOT_FOUND for row in chart.rows)
-

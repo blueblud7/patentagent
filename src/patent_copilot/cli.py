@@ -15,7 +15,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("request", help="Path to a build_claim_chart JSON request.")
     parser.add_argument(
         "--format",
-        choices=("json", "markdown"),
+        choices=("json", "markdown", "csv"),
         default="markdown",
         help="Output format. Defaults to markdown.",
     )
@@ -30,6 +30,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.format == "json":
         json.dump(chart.model_dump(mode="json"), sys.stdout, indent=2, ensure_ascii=False)
         sys.stdout.write("\n")
+    elif args.format == "csv":
+        sys.stdout.write(chart.csv)
     else:
         sys.stdout.write(chart.markdown)
         sys.stdout.write("\n")
@@ -43,4 +45,3 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
