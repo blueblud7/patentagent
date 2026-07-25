@@ -16,9 +16,11 @@ Implemented:
 - CSV output for claim-chart rows.
 - Multi-reference per-element mapping details in JSON output.
 - LLM-ready prompt boundaries for claim decomposition and evidence mapping.
-- `search_prior_art` MCP tool wrapper with a PatentsView adapter boundary.
+- Patent ID normalization for common forms such as `US 12,345,678 B2` and Google Patents URLs.
+- `search_prior_art` MCP tool wrapper with a PatentsView adapter boundary and keyless fallback guidance.
+- `build_claim_chart` ID fetching via optional PatentsView first, then keyless Google Patents page fetch fallback.
 - Manual prior-art text path for local demos and tests without API keys.
-- Sample request, 5 golden fixtures, and validation script.
+- Sample requests, Google Patents parser fixture, 5 golden fixtures, and validation script.
 
 Not yet implemented:
 
@@ -62,6 +64,17 @@ For local development without external patent APIs, pass manual prior-art text d
 }
 ```
 
+You can also pass patent IDs:
+
+```json
+{
+  "claim_text": "1. A system comprising: a processor configured to receive sensor data; and a memory storing instructions to classify the sensor data.",
+  "prior_art_ids": ["US12345678B2"]
+}
+```
+
+For ID-based fetching, v0.1 tries PatentsView when `PATENTSVIEW_API_KEY` is configured, then falls back to fetching the matching Google Patents page. The fallback is useful for demos and targeted references, not bulk searching.
+
 ## Run Offline Demo
 
 This path does not require API keys or external patent services:
@@ -88,7 +101,7 @@ Expected result: a three-row claim chart with evidence for the processor and mem
 
 ## Environment Variables
 
-- `PATENTSVIEW_API_KEY`: optional. Required only when using the PatentsView adapter.
+- `PATENTSVIEW_API_KEY`: optional. Used for PatentsView search/fetch. Without it, `search_prior_art` returns fallback guidance and `build_claim_chart` can still fetch specific patent IDs through Google Patents pages when network/dependencies are available.
 
 ## v0.1 Design
 
@@ -97,9 +110,11 @@ Expected result: a three-row claim chart with evidence for the processor and mem
 1. Decompose the claim into numbered elements.
 2. Retrieve candidate evidence passages from each prior-art document.
 3. Map each claim element to the strongest evidence.
-4. Emit both structured JSON and a Markdown chart.
+4. Emit structured JSON, a Markdown chart, and CSV rows.
 
 The implementation intentionally refuses to mark an element as disclosed unless it has supporting text. Missing or weak evidence is reported as a gap.
+
+`search_prior_art` is intentionally conservative in v0.1. PatentsView powers API search when a key is available. Without a key, the tool returns a structured result explaining that specific `prior_art_ids` should be supplied.
 
 ## Development
 

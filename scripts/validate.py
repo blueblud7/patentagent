@@ -4,8 +4,11 @@ import json
 from pathlib import Path
 
 from patent_copilot.core.chart_builder import build_claim_chart
+from patent_copilot.core.patent_id import google_patents_url, normalize_patent_id, patentsview_numeric_id
 from patent_copilot.core.schemas import MappingStatus, PriorArtDocument
+from patent_copilot.adapters.google_patents import parse_google_patents_html
 from patent_copilot.tools.build_claim_chart import build_claim_chart_tool
+from patent_copilot.tools.search_prior_art import search_prior_art_tool
 
 
 def main() -> int:
@@ -21,6 +24,15 @@ def main() -> int:
     assert chart.rows[1].evidence
     assert chart.markdown.startswith("| Element | Role | Claim Element | Best Prior Art | Mapping |")
     assert chart.csv.startswith("element_no,role,claim_element,best_prior_art_id,mapping")
+    assert normalize_patent_id("us 12,345,678 b2") == "US12345678B2"
+    assert normalize_patent_id("12345678") == "US12345678"
+    assert patentsview_numeric_id("US12345678B2") == "12345678B2"
+    assert google_patents_url("US12345678B2") == "https://patents.google.com/patent/US12345678B2/en"
+
+    sample_html = Path("examples/google_patents_sample.html").read_text()
+    parsed = parse_google_patents_html(sample_html, "US-DEMO-HTML")
+    assert parsed.title == "Sensor classification system"
+    assert "processor receives sensor data" in (parsed.description or "").lower()
 
     missing = build_claim_chart(
         "1. A device comprising: a quantum antenna configured to teleport packets.",
@@ -40,6 +52,9 @@ def main() -> int:
     )
     assert result["rows"][1]["evidence"][0]["prior_art_id"] == "US-DEMO-1"
     assert "csv" in result
+    search_result = asyncio.run(search_prior_art_tool("sensor classifier", limit=1))
+    assert search_result["results"]
+    assert search_result["results"][0]["id"] == "manual-search-required"
 
     for fixture_path in sorted(Path("examples/golden").glob("*.json")):
         _validate_fixture(fixture_path)

@@ -4,6 +4,7 @@ import os
 from typing import Any
 
 from patent_copilot.adapters.base import PatentDataAdapter
+from patent_copilot.core.patent_id import google_patents_url, patentsview_numeric_id
 from patent_copilot.core.schemas import PriorArtDocument, PriorArtSearchResult
 
 
@@ -49,7 +50,7 @@ class PatentsViewAdapter(PatentDataAdapter):
                 abstract=item.get("patent_abstract"),
                 publication_date=item.get("patent_date"),
                 jurisdiction=jurisdiction,
-                url=_google_patents_url(item.get("patent_id")),
+                url=google_patents_url(item.get("patent_id")),
                 reason="Matched query against PatentsView title or abstract fields.",
             )
             for item in patents
@@ -61,8 +62,9 @@ class PatentsViewAdapter(PatentDataAdapter):
         if not ids:
             return []
 
+        normalized_ids = [patentsview_numeric_id(item) for item in ids]
         payload = {
-            "q": {"patent_id": {"_in": ids}},
+            "q": {"patent_id": {"_in": normalized_ids}},
             "f": ["patent_id", "patent_title", "patent_abstract"],
             "o": {"size": min(len(ids), 100)},
         }
@@ -77,7 +79,7 @@ class PatentsViewAdapter(PatentDataAdapter):
                     id=patent_id,
                     title=item.get("patent_title"),
                     abstract=item.get("patent_abstract"),
-                    url=_google_patents_url(patent_id),
+                    url=google_patents_url(patent_id),
                     metadata={"source": "patentsview"},
                 )
             )
@@ -102,9 +104,3 @@ class PatentsViewAdapter(PatentDataAdapter):
             raise RuntimeError(
                 "PATENTSVIEW_API_KEY is not configured. Pass prior_art_texts directly or set the key."
             )
-
-
-def _google_patents_url(patent_id: str | None) -> str | None:
-    if not patent_id:
-        return None
-    return f"https://patents.google.com/patent/US{patent_id}"
