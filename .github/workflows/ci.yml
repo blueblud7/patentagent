@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Run unit tests
+        run: pytest
+
+      - name: Run validation script
+        run: python scripts/validate.py
+
+      - name: Run golden fixture evaluation
+        run: patent-copilot-eval --json
+
+      - name: Run runtime preflight
+        run: patent-copilot-preflight
+
+      - name: Run MCP smoke
+        run: patent-copilot-smoke
+

@@ -142,6 +142,12 @@ If dev dependencies are not installed, run the repository-local validation scrip
 PYTHONPATH=src python3 scripts/validate.py
 ```
 
+Run the local CI-equivalent checks that do not require installed entry points:
+
+```bash
+PYTHONPATH=src python3 scripts/ci_check.py
+```
+
 Run golden fixture scoring:
 
 ```bash
@@ -160,6 +166,16 @@ patent-copilot-smoke
 ```
 
 If `mcp` is not installed, the smoke script reports that clearly while still checking the tool-layer imports.
+
+## CI
+
+GitHub Actions runs on Python 3.11 and installs the package with dev dependencies. The workflow runs:
+
+- `pytest`
+- `python scripts/validate.py`
+- `patent-copilot-eval --json`
+- `patent-copilot-preflight`
+- `patent-copilot-smoke`
 
 ## LLM Mapping Boundary
 
