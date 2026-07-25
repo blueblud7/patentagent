@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import json
+import asyncio
 from pathlib import Path
 
 from patent_copilot.core.chart_builder import build_claim_chart
+from patent_copilot.core.evaluation import evaluate_claim_chart
+from patent_copilot.core.mapping import PromptOnlyMappingModel
 from patent_copilot.core.patent_id import google_patents_url, normalize_patent_id, patentsview_numeric_id
 from patent_copilot.core.schemas import MappingStatus, PriorArtDocument
 from patent_copilot.adapters.google_patents import parse_google_patents_html
@@ -33,6 +36,12 @@ def main() -> int:
     parsed = parse_google_patents_html(sample_html, "US-DEMO-HTML")
     assert parsed.title == "Sensor classification system"
     assert "processor receives sensor data" in (parsed.description or "").lower()
+    prompt_model = PromptOnlyMappingModel()
+    prompt_result = asyncio.run(
+        prompt_model.map_element(chart.elements[1], documents[0], chart.rows[1].evidence)
+    )
+    assert prompt_result.prior_art_id == "US-DEMO-1"
+    assert "Claim element:" in prompt_result.prompt
 
     missing = build_claim_chart(
         "1. A device comprising: a quantum antenna configured to teleport packets.",
@@ -42,8 +51,6 @@ def main() -> int:
     assert any(row.gap for row in missing.rows)
 
     # Importing and calling the async tool wrapper should work for manual text without API keys.
-    import asyncio
-
     result = asyncio.run(
         build_claim_chart_tool(
             claim_text=request["claim_text"],
@@ -68,6 +75,8 @@ def _validate_fixture(path: Path) -> None:
     documents = [PriorArtDocument.model_validate(item) for item in fixture["prior_art_texts"]]
     chart = build_claim_chart(fixture["claim_text"], documents)
     expected = fixture["expected"]
+    report = evaluate_claim_chart(chart, expected, fixture_name=fixture["name"])
+    assert report.passed, report.to_dict()
 
     assert len(chart.rows) >= expected["min_rows"], fixture["name"]
     assert chart.markdown.count("\n") >= expected["min_rows"], fixture["name"]

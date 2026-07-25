@@ -21,11 +21,14 @@ Implemented:
 - `build_claim_chart` ID fetching via optional PatentsView first, then keyless Google Patents page fetch fallback.
 - Manual prior-art text path for local demos and tests without API keys.
 - Sample requests, Google Patents parser fixture, 5 golden fixtures, and validation script.
+- Golden fixture quality scoring for claim-chart regressions.
+- MCP smoke script that reports missing optional server dependencies instead of failing opaque imports.
+- Prompt-only LLM mapping abstraction for future model-backed claim element mapping.
 
 Not yet implemented:
 
 - Production-grade patent text retrieval across USPTO/EPO/KIPRIS/Google Patents.
-- LLM-assisted legal/technical mapping prompts.
+- Live LLM-assisted legal/technical mapping execution.
 - Multi-reference charts and practitioner editing UX.
 - Full MCP integration test against a live client.
 
@@ -128,3 +131,26 @@ If dev dependencies are not installed, run the repository-local validation scrip
 ```bash
 PYTHONPATH=src python3 scripts/validate.py
 ```
+
+Run golden fixture scoring:
+
+```bash
+PYTHONPATH=src python3 scripts/evaluate_golden.py
+PYTHONPATH=src python3 scripts/evaluate_golden.py --json
+# After installation:
+patent-copilot-eval
+```
+
+Run MCP smoke:
+
+```bash
+PYTHONPATH=src python3 scripts/smoke_mcp.py
+# After installation:
+patent-copilot-smoke
+```
+
+If `mcp` is not installed, the smoke script reports that clearly while still checking the tool-layer imports.
+
+## LLM Mapping Boundary
+
+`src/patent_copilot/core/mapping.py` defines the model integration boundary. The current `PromptOnlyMappingModel` builds the practitioner-oriented evidence-mapping prompt without calling an external model. A future model adapter should implement the same `map_element(element, document, evidence)` shape and return a parsed `ReferenceMapping`.
