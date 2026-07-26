@@ -2,10 +2,8 @@ from __future__ import annotations
 
 import re
 
-from patent_copilot.core.schemas import ClaimElement
-from patent_copilot.core.schemas import ElementRole
+from patent_copilot.core.schemas import ClaimElement, ElementRole
 from patent_copilot.core.text import normalize_space
-
 
 CONNECTOR_PATTERNS = [
     r"\band\b\s+(?=(?:a|an|the|said)\s+[a-zA-Z0-9-]+)",
@@ -73,7 +71,7 @@ def classify_element(text: str, *, is_preamble: bool = False) -> tuple[ElementRo
 
 
 def _split_preamble(text: str) -> tuple[str | None, str]:
-    match = re.search(r"\b(comprising|comprises|including|includes|having)\b", text, re.I)
+    match = re.search(r"\b(comprising|comprises|including|includes|having)\b", text, re.IGNORECASE)
     if not match:
         return None, text
 
@@ -87,7 +85,7 @@ def _split_body(body: str) -> list[str]:
         return []
 
     pattern = "|".join(f"(?:{part})" for part in CONNECTOR_PATTERNS)
-    chunks = re.split(pattern, body, flags=re.I)
+    chunks = re.split(pattern, body, flags=re.IGNORECASE)
 
     merged: list[str] = []
     for chunk in chunks:

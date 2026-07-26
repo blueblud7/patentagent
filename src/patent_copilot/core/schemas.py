@@ -75,6 +75,9 @@ class Evidence(ModelMixin):
     score: float
     why_relevant: str
     locator: str | None = None
+    matched_terms: list[str] = field(default_factory=list)
+    missing_terms: list[str] = field(default_factory=list)
+    term_coverage: float = 0.0
 
 
 @dataclass
@@ -87,7 +90,8 @@ class ClaimChartRow(ModelMixin):
     confidence: Confidence
     role: ElementRole = ElementRole.UNKNOWN
     evidence: list[Evidence] = field(default_factory=list)
-    reference_mappings: list["ReferenceMapping"] = field(default_factory=list)
+    reference_mappings: list[ReferenceMapping] = field(default_factory=list)
+    review_flags: list[str] = field(default_factory=list)
     gap: str | None = None
 
 
@@ -108,10 +112,46 @@ class ClaimChart(ModelMixin):
     rows: list[ClaimChartRow]
     markdown: str
     csv: str = ""
+    review_summary: ChartReviewSummary | None = None
+    document_coverage: list[DocumentCoverage] = field(default_factory=list)
+    retrieval_attempts: list[RetrievalAttempt] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
     disclaimer: str = (
         "Research and drafting assistance only. Not legal advice. "
         "Review by a qualified patent professional is required."
     )
+
+
+@dataclass
+class ChartReviewSummary(ModelMixin):
+    total_rows: int
+    rows_requiring_review: int
+    needs_practitioner_review: bool
+    mapping_counts: dict[str, int] = field(default_factory=dict)
+    confidence_counts: dict[str, int] = field(default_factory=dict)
+    review_flag_counts: dict[str, int] = field(default_factory=dict)
+    highest_risk_flags: list[str] = field(default_factory=list)
+
+
+@dataclass
+class DocumentCoverage(ModelMixin):
+    id: str
+    source: str
+    sections: list[str]
+    character_count: int
+    title: str | None = None
+    url: str | None = None
+    warnings: list[str] = field(default_factory=list)
+
+
+@dataclass
+class RetrievalAttempt(ModelMixin):
+    provider: str
+    requested_ids: list[str]
+    found_ids: list[str] = field(default_factory=list)
+    missing_ids: list[str] = field(default_factory=list)
+    status: str = "not_run"
+    error: str | None = None
 
 
 @dataclass

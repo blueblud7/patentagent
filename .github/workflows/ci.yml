@@ -8,6 +8,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      PATENTSVIEW_API_KEY: ${{ secrets.PATENTSVIEW_API_KEY }}
 
     steps:
       - name: Check out repository
@@ -27,6 +29,9 @@ jobs:
       - name: Run unit tests
         run: pytest
 
+      - name: Run lint
+        run: ruff check .
+
       - name: Run validation script
         run: python scripts/validate.py
 
@@ -39,3 +44,50 @@ jobs:
       - name: Run MCP smoke
         run: patent-copilot-smoke
 
+      - name: Run MCP integration smoke
+        run: patent-copilot-mcp-integration
+
+      - name: Build package artifacts
+        run: python -m build
+
+      - name: Check package artifacts
+        run: python scripts/check_distribution.py --output dist/distribution_check.json
+
+      - name: Run installed wheel smoke
+        run: patent-copilot-installed-wheel-smoke --output dist/installed_wheel_smoke.json
+
+      - name: Run live retrieval smoke
+        run: patent-copilot-live-retrieval-smoke --output dist/live_retrieval_smoke.json
+
+      - name: Run strict live retrieval smoke
+        if: ${{ env.PATENTSVIEW_API_KEY != '' }}
+        run: patent-copilot-live-retrieval-smoke --require-api-key --output dist/live_retrieval_smoke.json
+
+      - name: Write release manifest
+        if: ${{ env.PATENTSVIEW_API_KEY == '' }}
+        run: python scripts/write_release_manifest.py
+
+      - name: Write release manifest with live retrieval
+        if: ${{ env.PATENTSVIEW_API_KEY != '' }}
+        run: python scripts/write_release_manifest.py --require-live
+
+      - name: Run readiness audit
+        if: ${{ env.PATENTSVIEW_API_KEY == '' }}
+        run: python scripts/readiness_audit.py --release-gate-passed --distribution-check-passed --installed-wheel-smoke-passed --output dist/readiness_report.json
+
+      - name: Run readiness audit with live retrieval
+        if: ${{ env.PATENTSVIEW_API_KEY != '' }}
+        run: python scripts/readiness_audit.py --release-gate-passed --distribution-check-passed --installed-wheel-smoke-passed --live-retrieval-passed --output dist/readiness_report.json
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: patent-copilot-release-artifacts
+          path: |
+            dist/patent_copilot-*.whl
+            dist/patent_copilot-*.tar.gz
+            dist/distribution_check.json
+            dist/installed_wheel_smoke.json
+            dist/readiness_report.json
+            dist/live_retrieval_smoke.json
+            dist/release_manifest.json

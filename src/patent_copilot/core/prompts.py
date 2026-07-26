@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from patent_copilot.core.schemas import ClaimElement, Evidence, PriorArtDocument
 
-
 CLAIM_DECOMPOSITION_PROMPT = """\
 You are assisting a patent professional with claim-chart preparation.
 

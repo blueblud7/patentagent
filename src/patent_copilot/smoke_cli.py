@@ -19,7 +19,7 @@ def main() -> int:
         assert build_claim_chart_tool
         assert search_prior_art_tool
         status["tools_importable"] = True
-    except Exception as exc:
+    except (ImportError, AssertionError) as exc:
         status["message"] = f"tool import failed: {exc}"
         print(json.dumps(status, indent=2))
         return 1
@@ -30,12 +30,12 @@ def main() -> int:
         return 0
 
     try:
-        import patent_copilot.server as server
+        from patent_copilot import server
 
         assert server.mcp
         status["server_importable"] = True
         status["message"] = "server import smoke passed"
-    except Exception as exc:
+    except (ImportError, RuntimeError, AssertionError) as exc:
         status["message"] = f"server import failed: {exc}"
         print(json.dumps(status, indent=2))
         return 1
@@ -46,4 +46,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

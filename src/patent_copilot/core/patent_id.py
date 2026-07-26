@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import re
 
-
 KNOWN_COUNTRY_CODES = {
     "US",
     "EP",
@@ -20,7 +19,7 @@ def normalize_patent_id(value: str, *, default_country: str = "US") -> str:
     """Normalize common patent ID forms into a compact Google Patents-compatible ID."""
 
     cleaned = value.strip()
-    cleaned = re.sub(r"https?://patents\.google\.com/patent/", "", cleaned, flags=re.I)
+    cleaned = re.sub(r"https?://patents\.google\.com/patent/", "", cleaned, flags=re.IGNORECASE)
     cleaned = re.sub(r"/.*$", "", cleaned)
     cleaned = cleaned.upper()
     cleaned = re.sub(r"[^A-Z0-9]", "", cleaned)
@@ -44,4 +43,10 @@ def patentsview_numeric_id(patent_id: str) -> str:
     normalized = normalize_patent_id(patent_id, default_country="US")
     if not normalized.startswith("US"):
         return normalized
-    return re.sub(r"^US", "", normalized)
+    numeric = re.sub(r"^US", "", normalized)
+    return re.sub(r"[A-Z]\d?$", "", numeric)
+
+
+def is_us_publication_id(patent_id: str) -> bool:
+    numeric = patentsview_numeric_id(patent_id)
+    return len(numeric) == 11 and numeric.startswith("20")

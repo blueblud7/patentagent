@@ -1,0 +1,16 @@
+{
+  "name": "abstract_only_warning",
+  "claim_text": "1. A system comprising: a processor configured to receive encrypted sensor data from a wireless gateway.",
+  "prior_art_texts": [
+    {
+      "id": "US-DEMO-6",
+      "title": "Processor receives sensor data",
+      "abstract": "A processor receives sensor data from a gateway."
+    }
+  ],
+  "expected": {
+    "min_rows": 2,
+    "must_disclose_terms": [],
+    "must_not_fully_disclose_terms": ["encrypted sensor data", "wireless gateway"]
+  }
+}

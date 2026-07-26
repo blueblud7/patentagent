@@ -26,6 +26,8 @@ def retrieve_evidence(
                 score = _overlap_score(element_terms, passage_terms)
                 if score <= 0:
                     continue
+                matched_terms = _matched_terms(element_terms, passage_terms)
+                missing_terms = _missing_terms(element_terms, passage_terms)
                 candidates.append(
                     Evidence(
                         prior_art_id=document.id,
@@ -33,7 +35,10 @@ def retrieve_evidence(
                         locator=paragraph_locator(passage),
                         quote=passage,
                         score=round(score, 4),
-                        why_relevant=_why_relevant(element_terms, passage_terms),
+                        why_relevant=_why_relevant(matched_terms, missing_terms),
+                        matched_terms=matched_terms,
+                        missing_terms=missing_terms,
+                        term_coverage=round(len(matched_terms) / max(len(element_terms), 1), 4),
                     )
                 )
 
@@ -52,10 +57,20 @@ def _overlap_score(element_terms: Counter[str], passage_terms: Counter[str]) -> 
     return (0.7 * recall) + (0.3 * precision) + phrase_bonus
 
 
-def _why_relevant(element_terms: Counter[str], passage_terms: Counter[str]) -> str:
-    overlap = sorted(set(element_terms).intersection(passage_terms))
-    if not overlap:
-        return "No material term overlap."
-    terms = ", ".join(overlap[:8])
-    return f"Shares material terms with the claim element: {terms}."
+def _matched_terms(element_terms: Counter[str], passage_terms: Counter[str]) -> list[str]:
+    return sorted(set(element_terms).intersection(passage_terms))
 
+
+def _missing_terms(element_terms: Counter[str], passage_terms: Counter[str]) -> list[str]:
+    return sorted(set(element_terms).difference(passage_terms))
+
+
+def _why_relevant(matched_terms: list[str], missing_terms: list[str]) -> str:
+    if not matched_terms:
+        return "No material term overlap."
+    terms = ", ".join(matched_terms[:8])
+    message = f"Shares material terms with the claim element: {terms}."
+    if missing_terms:
+        missing = ", ".join(missing_terms[:8])
+        message += f" Missing material terms: {missing}."
+    return message

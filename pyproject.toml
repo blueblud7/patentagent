@@ -12,13 +12,29 @@ license = "MIT"
 authors = [
   { name = "patent-copilot contributors" }
 ]
+keywords = ["mcp", "patent", "prior-art", "claim-chart", "patentsview"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Legal Industry",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Scientific/Engineering :: Information Analysis"
+]
 dependencies = [
   "mcp>=1.0.0",
-  "httpx>=0.27.0"
+  "httpx>=0.27.0",
+  "pydantic>=2.0.0"
 ]
+
+[project.urls]
+Homepage = "https://github.com/blueblud7/patentagent"
+Documentation = "https://github.com/blueblud7/patentagent#readme"
+Issues = "https://github.com/blueblud7/patentagent/issues"
 
 [project.optional-dependencies]
 dev = [
+  "build>=1.2.0",
   "pytest>=8.0.0",
   "ruff>=0.6.0"
 ]
@@ -28,7 +44,12 @@ patent-copilot = "patent_copilot.server:main"
 patent-copilot-demo = "patent_copilot.cli:main"
 patent-copilot-eval = "patent_copilot.eval_cli:main"
 patent-copilot-smoke = "patent_copilot.smoke_cli:main"
+patent-copilot-mcp-integration = "patent_copilot.mcp_integration_cli:main"
+patent-copilot-live-retrieval-smoke = "patent_copilot.live_retrieval_cli:main"
+patent-copilot-installed-wheel-smoke = "patent_copilot.installed_wheel_smoke_cli:main"
 patent-copilot-preflight = "patent_copilot.preflight_cli:main"
+patent-copilot-release-check = "patent_copilot.release_check_cli:main"
+patent-copilot-readiness-audit = "patent_copilot.readiness_cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/patent_copilot"]

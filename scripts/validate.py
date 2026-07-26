@@ -1,18 +1,22 @@
 from __future__ import annotations
 
-import json
 import asyncio
+import json
 from pathlib import Path
 
+from patent_copilot.adapters.google_patents import parse_google_patents_html
 from patent_copilot.core.chart_builder import build_claim_chart
 from patent_copilot.core.evaluation import evaluate_claim_chart
 from patent_copilot.core.mapping import PromptOnlyMappingModel
-from patent_copilot.core.patent_id import google_patents_url, normalize_patent_id, patentsview_numeric_id
+from patent_copilot.core.patent_id import (
+    google_patents_url,
+    normalize_patent_id,
+    patentsview_numeric_id,
+)
 from patent_copilot.core.schemas import MappingStatus, PriorArtDocument
 from patent_copilot.preflight_cli import MIN_RUNTIME
-from patent_copilot.adapters.google_patents import parse_google_patents_html
-from patent_copilot.tools.build_claim_chart import build_claim_chart_tool
-from patent_copilot.tools.search_prior_art import search_prior_art_tool
+from patent_copilot.tools.build_claim_chart import build_claim_chart_mcp_response
+from patent_copilot.tools.search_prior_art import search_prior_art_mcp_response
 
 
 def main() -> int:
@@ -30,7 +34,7 @@ def main() -> int:
     assert chart.csv.startswith("element_no,role,claim_element,best_prior_art_id,mapping")
     assert normalize_patent_id("us 12,345,678 b2") == "US12345678B2"
     assert normalize_patent_id("12345678") == "US12345678"
-    assert patentsview_numeric_id("US12345678B2") == "12345678B2"
+    assert patentsview_numeric_id("US12345678B2") == "12345678"
     assert google_patents_url("US12345678B2") == "https://patents.google.com/patent/US12345678B2/en"
     assert MIN_RUNTIME == (3, 11)
 
@@ -54,16 +58,19 @@ def main() -> int:
 
     # Importing and calling the async tool wrapper should work for manual text without API keys.
     result = asyncio.run(
-        build_claim_chart_tool(
+        build_claim_chart_mcp_response(
             claim_text=request["claim_text"],
             prior_art_texts=request["prior_art_texts"],
         )
     )
+    assert result["ok"] is True
     assert result["rows"][1]["evidence"][0]["prior_art_id"] == "US-DEMO-1"
+    assert "matched_terms" in result["rows"][1]["evidence"][0]
     assert "csv" in result
-    search_result = asyncio.run(search_prior_art_tool("sensor classifier", limit=1))
+    search_result = asyncio.run(search_prior_art_mcp_response("sensor classifier", limit=1))
+    assert search_result["ok"] is True
+    assert search_result["provider"] in {"patentsview", "google_patents"}
     assert search_result["results"]
-    assert search_result["results"][0]["id"] == "manual-search-required"
 
     for fixture_path in sorted(Path("examples/golden").glob("*.json")):
         _validate_fixture(fixture_path)
